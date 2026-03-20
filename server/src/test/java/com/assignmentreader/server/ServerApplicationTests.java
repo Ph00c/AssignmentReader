@@ -1,10 +1,10 @@
-package com.classagent.traffic;
+package com.assignmentreader.server;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class TrafficApplicationTests {
+class ServerApplicationTests {
 
 	@Test
 	void contextLoads() {

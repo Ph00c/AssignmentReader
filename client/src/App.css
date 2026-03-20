@@ -1,42 +1,101 @@
 #root {
-  max-width: 1280px;
+  max-width: 600px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.upload-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  border: 1px solid #333;
+  border-radius: 8px;
+  width: 100%;
+  background: #1a1a1a;
 }
 
-.card {
-  padding: 2em;
+.file-name {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin: 0;
 }
 
-.read-the-docs {
-  color: #888;
+.button-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+button {
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-submit {
+  background: #646cff;
+  color: #fff;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: #535bf2;
+}
+
+.btn-clear {
+  background: #333;
+  color: #fff;
+}
+
+.btn-clear:hover {
+  background: #444;
+}
+
+.response-box {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 1.25rem;
+  background: #1a1a1a;
+}
+
+.response-box h2 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.response-box pre {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #e0e0e0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 400px;
+  overflow-y: auto;
 }

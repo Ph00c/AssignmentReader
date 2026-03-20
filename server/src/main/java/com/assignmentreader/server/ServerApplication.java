@@ -1,13 +1,13 @@
-package com.classagent.traffic;
+package com.assignmentreader.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class TrafficApplication {
+public class ServerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TrafficApplication.class, args);
+		SpringApplication.run(ServerApplication.class, args);
 	}
 
 }
