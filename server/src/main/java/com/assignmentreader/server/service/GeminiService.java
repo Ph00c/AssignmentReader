@@ -23,7 +23,7 @@ public class GeminiService {
 
     public GeminiResponse generateContent(GeminiRequest request) {
         return restClient.post()
-                .uri("/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey)
+                .uri("/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey)
                 .body(request)
                 .retrieve()
                 .body(GeminiResponse.class);

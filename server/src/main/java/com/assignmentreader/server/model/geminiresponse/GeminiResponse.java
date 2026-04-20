@@ -1,11 +1,13 @@
 package com.assignmentreader.server.model.geminiresponse;
 
+import lombok.Data;
 import java.util.List;
 
+@Data
 public class GeminiResponse {
-    private List<Canidates> canidateslist;
+    private List<Candidate> candidates;
 
-    public GeminiResponse(Content content) {
-        this.content = content;
+    public GeminiResponse(List<Candidate> candidates) {
+        this.candidates = candidates;
     }
 }
