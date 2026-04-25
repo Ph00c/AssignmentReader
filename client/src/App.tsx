@@ -1,39 +1,74 @@
 import { useState, useRef } from 'react'
 import './App.css'
+import * as pdfjsLib from 'pdfjs-dist'
+import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
+
+async function extractPdfText(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer()
+  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise
+  const pages: string[] = []
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i)
+    const content = await page.getTextContent()
+    const pageText = content.items
+      .map((item: any) => ('str' in item ? item.str : ''))
+      .join(' ')
+    pages.push(pageText)
+  }
+  return pages.join('\n')
+}
+
+type Status = 'pending' | 'processing' | 'done' | 'error'
+
+interface FileResult {
+  fileName: string
+  status: Status
+  error?: string
+}
 
 function App() {
-  const [file, setFile] = useState<File | null>(null)
+  const [files, setFiles] = useState<File[]>([])
+  const [results, setResults] = useState<FileResult[]>([])
+  const [loading, setLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [responseData, setResponseData] = useState<any>(null)
 
-  const handleSubmit = () => {
-    if (!file) return
-    console.log('Submitting file:', file.name)
-    const form = new FormData()
-    form.append('file', file)
-    fetch('/api/upload', {
-      method: 'POST',
-      body: form,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log('Response from backend:', data)
-        setResponseData(data)
+  const handleSubmit = async () => {
+    if (files.length === 0) return
+    setLoading(true)
+    setResults(files.map(f => ({ fileName: f.name, status: 'processing' })))
+
+    try {
+      const texts = await Promise.all(files.map(extractPdfText))
+      const combined = texts
+        .map((text, i) => `=== ${files[i].name} ===\n${text}`)
+        .join('\n\n')
+
+      const res = await fetch('/api/Excel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: combined,
       })
-      .catch((error) => {
-        console.error('Error uploading file:', error)
-        alert('Failed to upload file.')
-      })
+      if (!res.ok) throw new Error(`Server error: ${res.status}`)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'ParsedSyllabi.xlsx'
+      a.click()
+      URL.revokeObjectURL(url)
+      setResults(files.map(f => ({ fileName: f.name, status: 'done' })))
+    } catch (err) {
+      setResults(files.map(f => ({ fileName: f.name, status: 'error', error: String(err) })))
+    }
+    setLoading(false)
   }
 
-  const  handleClear = async () => {
-    setFile(null)
+  const handleClear = () => {
+    setFiles([])
+    setResults([])
     if (fileInputRef.current) fileInputRef.current.value = ''
-    const response = await fetch('/api/bello', { method: 'GET' })
-    const data = await response.json()
-    console.log('Response from backend:', data)
-   
-    
   }
 
   return (
@@ -43,22 +78,39 @@ function App() {
         <input
           ref={fileInputRef}
           type="file"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          accept=".pdf"
+          multiple
+          onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
         />
-        {file && <p className="file-name">{file.name}</p>}
+        {files.length > 0 && (
+          <ul className="file-list">
+            {files.map((f, i) => (
+              <li key={i} className="file-name">{f.name}</li>
+            ))}
+          </ul>
+        )}
         <div className="button-row">
-          <button className="btn-submit" onClick={handleSubmit} disabled={!file}>
-            Submit
+          <button className="btn-submit" onClick={handleSubmit} disabled={files.length === 0 || loading}>
+            {loading ? 'Processing...' : 'Submit'}
           </button>
-          <button className="btn-clear" onClick={handleClear}>
+          <button className="btn-clear" onClick={handleClear} disabled={loading}>
             Clear
           </button>
         </div>
       </div>
-      {responseData !== null && (
+      {results.length > 0 && (
         <div className="response-box">
-          <h2>Response</h2>
-          <pre>{JSON.stringify(responseData, null, 2)}</pre>
+          <h2>Results</h2>
+          {results.map((r, i) => (
+            <p key={i} className={`result-${r.status}`}>
+              {r.fileName}: {
+                r.status === 'pending' ? 'Waiting...' :
+                r.status === 'processing' ? 'Processing...' :
+                r.status === 'done' ? 'Downloaded' :
+                `Failed — ${r.error}`
+              }
+            </p>
+          ))}
         </div>
       )}
     </div>
